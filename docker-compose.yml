@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  frontend:
+    container_name: aquafarm-frontend
+    build:
+      context: ./aquafarm-frontend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3007:3000"
+    environment:
+      - REACT_APP_BACKEND_URL=http://127.0.0.1:5005
+
+  db:
+    container_name: aquafarm-db
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: aquafarmpassword
+      MYSQL_DATABASE: aquafarm-transactions
+    ports:
+      - "3318:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./aquafarm_dump.sql:/docker-entrypoint-initdb.d/aquafarm_dump.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql_data:
